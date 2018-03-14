@@ -12,8 +12,7 @@ import Alamofire
 class HTTPMovie {
     static func nowPlaying(completionHandler: @escaping (MoviesResponse?)->Void) {
         do {
-            let urlRequest = try MovieDBRouter.movie.nowPlayingURLRequest()
-            print(urlRequest)
+            let urlRequest = try MovieRouter.topRated.asURLRequest()
             Alamofire.request(urlRequest)
                 .responseJSON { response in
                     guard response.result.isSuccess else {
@@ -31,7 +30,6 @@ class HTTPMovie {
             }
         }
         catch {
-            print("Crash")
             completionHandler(nil)
         }
     }
