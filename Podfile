@@ -1,0 +1,12 @@
+platform :ios, '9.0'
+use_frameworks!
+
+target 'TheMovieDB' do
+
+  pod 'Alamofire', '~> 4.7'
+  pod 'AlamofireImage', '~> 3.3'
+
+  target 'TheMovieDBTests' do
+    inherit! :search_paths
+  end
+end
