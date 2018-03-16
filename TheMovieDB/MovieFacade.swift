@@ -10,8 +10,8 @@ import Foundation
 import Alamofire
 
 class MovieFacade {
-    static func nowPlaying(completionHandler: @escaping (MoviesResponse?)->Void) {
-        HTTPMovie.nowPlaying { moviesResponse in
+    static func getMovies(withCategory category: MovieRouter,completionHandler: @escaping (MoviesResponse?)->Void) {
+        HTTPMovie.getMovies(withCategory: category) { moviesResponse in
             completionHandler(moviesResponse)
         }
     }    

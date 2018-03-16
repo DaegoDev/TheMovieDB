@@ -10,9 +10,10 @@ import Foundation
 import Alamofire
 
 class HTTPMovie {
-    static func nowPlaying(completionHandler: @escaping (MoviesResponse?)->Void) {
+    static func getMovies(withCategory category: MovieRouter, completionHandler: @escaping (MoviesResponse?)->Void) {
         do {
-            let urlRequest = try MovieRouter.topRated.asURLRequest()
+            let urlRequest = try category.asURLRequest()
+            
             Alamofire.request(urlRequest)
                 .responseJSON { response in
                     guard response.result.isSuccess else {

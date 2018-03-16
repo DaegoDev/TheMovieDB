@@ -12,41 +12,49 @@ import AlamofireImage
 
 private let reuseIdentifier = "MovieCollectionViewCellIdentifier"
 
-class MovieCollectionViewController: UICollectionViewController {
+class MovieCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+    
     var moviesResponse: MoviesResponse?
     var moviesImages: [Int : UIImage] = [Int : UIImage]()
-
+    @IBOutlet weak var collectionView: UICollectionView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        MovieFacade.nowPlaying { moviesResponse in
-            self.moviesResponse = moviesResponse
-            self.collectionView?.reloadData()
-        }
+        self.collectionView.delegate = self
+        self.collectionView.dataSource = self
+      
+        self.loadMoviesWith(category: .popular)
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
-
-    // MARK: - Navigation
     
+    // MARK: - CLASS HELPERS
+    private func loadMoviesWith(category: MovieRouter) {
+        MovieFacade.getMovies(withCategory: category) { moviesResponse in
+            self.moviesResponse = moviesResponse
+            self.collectionView?.reloadData()
+        }
+    }
+
+    // MARK: - NAVIGATION
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
     }
 
-    // MARK: UICollectionViewDataSource
+    // MARK: - UICollectionViewDataSource
 
-    override func numberOfSections(in collectionView: UICollectionView) -> Int {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
 
 
-    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return moviesResponse?.movies?.count ?? 0
     }
 
-    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as? MovieCollectionViewCell else {
             print("\(#function) Can't create cell with type MovieCollectionViewCell.")
             return UICollectionViewCell()
@@ -57,21 +65,33 @@ class MovieCollectionViewController: UICollectionViewController {
             print("\(#function) Can't create movie with title.")
             return UICollectionViewCell()
         }
+
+        let url = try? "https://image.tmdb.org/t/p/w154\(movie.posterPath ?? "")".asURL()
         
-        Alamofire.request(
-            "https://image.tmdb.org/t/p/w154\(movie.posterPath ?? "")"
-            )
-            .responseImage {response in
-                guard let image = response.result.value else {
-                    return
-                }
-                cell.movieImage.image = image
-        }
-        
+        cell.movieImage.af_setImage(withURL: url!)
         cell.movieTitle.text = movie.title
+        
         return cell
     }
-
+    
+    // MARK: - IBACTIONS
+    @IBAction func changeCategory(_ sender: UISegmentedControl) {
+        let index = sender.selectedSegmentIndex
+        
+        switch index {
+        case 0:
+            loadMoviesWith(category: .popular)
+        case 1:
+            loadMoviesWith(category: .upcoming)
+        case 2:
+            loadMoviesWith(category: .topRated)
+        case 3:
+            loadMoviesWith(category: .nowPlaying)
+        default:
+            break
+        }
+    }
+    
     // MARK: UICollectionViewDelegate
 
     /*
